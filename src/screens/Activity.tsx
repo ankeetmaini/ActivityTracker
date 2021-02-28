@@ -1,4 +1,4 @@
-import {Button, Share, Text, ToastAndroid, View} from 'react-native';
+import {Button, Share, Text, ToastAndroid, View, Image} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RouteProp} from '@react-navigation/native';
@@ -11,7 +11,7 @@ import activityJsonMapper from '../utils/activityJsonMapper';
 import Animation from 'lottie-react-native';
 import {Calendar} from 'react-native-calendars';
 import CheckBox from '@react-native-community/checkbox';
-
+import calendarImg from '../images/calendar.png';
 import {streakRanges} from 'date-streaks';
 
 const marginProps = {
@@ -204,7 +204,20 @@ const Activity = (props: Props) => {
               </Text>
             </View>
             <View
-              style={{display: 'flex', flexDirection: 'row', ...marginProps}}>
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                ...marginProps,
+                alignItems: 'center',
+              }}>
+              <Image
+                source={calendarImg}
+                resizeMode="contain"
+                style={{
+                  width: 40,
+                  height: 40,
+                  marginRight: 20,
+                }}></Image>
               <View>
                 <Text>{new Date().toDateString()}</Text>
               </View>
