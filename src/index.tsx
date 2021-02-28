@@ -80,7 +80,12 @@ const App = (props: any) => {
             <Stack.Screen name="Home">
               {(props) => <Home {...props} email={email} />}
             </Stack.Screen>
-            <Stack.Screen name="Activity" component={Activity}></Stack.Screen>
+            <Stack.Screen
+              name="Activity"
+              component={Activity}
+              options={({route}) => ({
+                title: route.params.name,
+              })}></Stack.Screen>
           </>
         ) : (
           <Stack.Screen name="Splash" component={Splash} />
