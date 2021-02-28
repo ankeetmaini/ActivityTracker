@@ -13,28 +13,6 @@ import Home from './screens/Home';
 import Splash from './screens/Splash';
 import Activity from './screens/Activity';
 
-PushNotification.onRegister((token) => {
-  console.log('onRegister', token);
-});
-PushNotification.onNotification((notification) => {
-  if (notification.foreground) {
-    console.log('onNotification foreground', notification);
-  } else {
-    console.log('onNotification background or closed', notification);
-  }
-  // extract the data passed in the push notification
-  // const data = JSON.parse(notification.data['pinpoint.jsonBody']);
-
-  // iOS only
-  // notification.finish(PushNotificationIOS.FetchResult.NoData);
-});
-PushNotification.onNotificationOpened((notification) => {
-  console.log('onNotificationOpened', notification);
-  // extract the data passed in the push notification
-  const data = JSON.parse(notification['pinpoint.jsonBody']);
-  console.log('onNotificationOpened data', data);
-});
-
 async function urlOpener(url: string, redirectUrl: string) {
   await InAppBrowser.isAvailable();
   // @ts-ignore

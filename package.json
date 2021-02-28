@@ -25,7 +25,6 @@
     "react-native": "0.63.4",
     "react-native-calendar-strip": "^2.1.9",
     "react-native-calendars": "^1.1254.0",
-    "react-native-chart-kit": "^6.11.0",
     "react-native-device-info": "^8.0.1",
     "react-native-gesture-handler": "^1.10.1",
     "react-native-inappbrowser-reborn": "^3.5.1",

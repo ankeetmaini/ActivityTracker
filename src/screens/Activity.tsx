@@ -1,33 +1,25 @@
-import {
-  Button,
-  Dimensions,
-  FlatList,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import {Text, View} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RouteProp} from '@react-navigation/native';
-import ago from 's-ago';
 
 import {StackParams} from '..';
 import {useProfile} from '../store/UserStore';
 import {useActivityLogs} from '../store/ActivityLogStore';
-import {ScrollView, TouchableOpacity} from 'react-native-gesture-handler';
+import {TouchableOpacity} from 'react-native-gesture-handler';
 import activityJsonMapper from '../utils/activityJsonMapper';
 import Animation from 'lottie-react-native';
-import {Calendar, CalendarList, Agenda} from 'react-native-calendars';
-const screenWidth = Dimensions.get('window').width;
-import {summary, streakRanges} from 'date-streaks';
-import {
-  LineChart,
-  BarChart,
-  PieChart,
-  ProgressChart,
-  ContributionGraph,
-  StackedBarChart,
-} from 'react-native-chart-kit';
+import {Calendar} from 'react-native-calendars';
+
+import {streakRanges} from 'date-streaks';
+
+const marginProps = {
+  marginTop: 20,
+  marginBottom: 10,
+  marginLeft: 10,
+  marginRight: 10,
+};
+
 type Props = {
   navigation: StackNavigationProp<StackParams, 'Activity'>;
   route: RouteProp<StackParams, 'Activity'>;
@@ -37,7 +29,7 @@ const Activity = (props: Props) => {
   const activityName = props.route.params.name;
   const user = useProfile();
 
-  const [date, setDate] = useState('2021-02');
+  const [date, setDate] = useState('2021-');
 
   const isFavAlready = user.activities[activityId];
   const activity = useActivityLogs();
@@ -82,7 +74,7 @@ const Activity = (props: Props) => {
     const {start, end} = current;
     const s = start.toISOString().split('T')[0];
     const e = end && end.toISOString().split('T')[0];
-    if (!end)
+    if (!end) {
       return {
         ...final,
         [s]: {
@@ -92,8 +84,26 @@ const Activity = (props: Props) => {
           endingDay: true,
         },
       };
+    }
 
-    // end and start both are there
+    const middleDates: {} = Array.from({length: current.duration - 2}).reduce(
+      (middle, _, index) => {
+        console.log(s);
+        const newDate = new Date(
+          new Date(s).getTime() + 3600 * 24 * (index + 1) * 1000,
+        )
+          .toISOString()
+          .split('T')[0];
+        return {
+          ...middle,
+          [newDate]: {
+            color: '#70d7c7',
+            textColor: 'white',
+          },
+        };
+      },
+      {},
+    );
     return {
       ...final,
       [s]: {
@@ -106,80 +116,9 @@ const Activity = (props: Props) => {
         textColor: 'white',
         endingDay: true,
       },
-      ...Array.from({length: current.duration - 2}).reduce(
-        (middle, current, index) => {
-          console.log(s);
-          const newDate = new Date(
-            new Date(s).getTime() + 3600 * 24 * (index + 1) * 1000,
-          )
-            .toISOString()
-            .split('T')[0];
-          return {
-            ...middle,
-            [newDate]: {
-              color: '#70d7c7',
-              textColor: 'white',
-            },
-          };
-        },
-        {},
-      ),
+      ...middleDates,
     };
   }, {});
-  console.log(streaks, '========', map);
-
-  // const streak = commits.reduce((commit, initialObj, index) => {
-  //   if (index === 0) {
-  //     // @ts-ignore
-  //     initialObj[commit.date] = {startingDate: true, color: '#70d7c7'};
-  //   } else if (index === commits.length - 1) {
-  //     // @ts-ignore
-  //     initialObj[commit.date] = {endingDate: true, color: '#70d7c7'};
-  //   } else {
-  //     // @ts-ignore
-  //     initialObj[commit.date] = {color: '#70d7c7'}
-  //   }
-  //   return initialObj;
-  // }, {} as any);
-  // // console.log(
-  //   'streakssss',
-  //   streakRanges({
-  //     dates: commits.map((d) => new Date(d.date)),
-  //   }),
-  // );
-  // const streaks = streakRanges({
-  //   dates: commits.map((d) => new Date(d.date)),
-  // });
-
-  // const streakMap = streaks.reduce((res, s) => {
-  //   const isEndSame = !s.end;
-
-  //   if (s.end && !res[s.end]) {
-  //     res[s.end] = {endingDay: true};
-  //   }
-  //   if (s.start && !res[s.start]) {
-  //     res[s.start] = {
-  //       startingDay: true,
-  //       ...(isEndSame ? {endingDay: true} : {}),
-  //     };
-  //   }
-
-  //   return res;
-  // }, {});
-
-  // const marked = commits.reduce(
-  //   (result, date) => ({
-  //     ...result,
-  //     [date.date]: {
-  //       ...(streakMap[date.date] || {}),
-  //       color: 'green',
-  //       textColor: 'white',
-  //     },
-  //   }),
-  //   {},
-  // );
-
-  // console.log(streak, '========');
 
   return (
     <View
@@ -215,10 +154,7 @@ const Activity = (props: Props) => {
             display: 'flex',
             elevation: 5,
             padding: 10,
-            marginTop: 20,
-            marginBottom: 10,
-            marginLeft: 10,
-            marginRight: 10,
+            ...marginProps,
           }}>
           <Text
             style={{
@@ -236,10 +172,7 @@ const Activity = (props: Props) => {
             justifyContent: 'center',
             display: 'flex',
             padding: 10,
-            marginTop: 20,
-            marginBottom: 10,
-            marginLeft: 10,
-            marginRight: 10,
+            ...marginProps,
           }}>
           <Text
             style={{color: 'white', fontWeight: '100', alignSelf: 'center'}}>
@@ -277,37 +210,7 @@ const Activity = (props: Props) => {
           margin: 10,
           justifyContent: 'center',
           alignItems: 'center',
-        }}>
-        {/* @ts-ignore */}
-        {/* <ContributionGraph
-          values={commits}
-          endDate={new Date(Date.now() + 60 * 60 * 24 * 10 * 1000)}
-          numDays={100}
-          width={screenWidth - 20}
-          height={220}
-          style={{
-            borderRadius: 4,
-            elevation: 10,
-          }}
-          chartConfig={{
-            backgroundGradientFrom: '#fff',
-            backgroundGradientTo: '#fff',
-            color: (opacity = 10) =>
-              `rgba(90, 38, 78, ${isNaN(opacity) ? 1 : opacity})`,
-          }}
-        /> */}
-      </View>
-      {/* 
-        {isFavAlready && <Button title="I did this - yo!" onPress={log} />}
-        
-        
-      )}
-      
-      {isFavAlready && <Button title="I did this - yo!" onPress={log} />}
-
-      
-      */}
-
+        }}></View>
       <Calendar markedDates={map} markingType={'period'} />
     </View>
   );

@@ -1,26 +1,16 @@
 import React, {useEffect, useState} from 'react';
-import {
-  Button,
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import {Text, TouchableOpacity, View} from 'react-native';
 import {StackNavigationProp} from '@react-navigation/stack';
 
 import {StackParams} from '../index';
 import defaultActivities from '../utils/default-activity-list';
 import {useProfile} from '../store/UserStore';
 import {User} from '../../types/models';
-import {withOAuth} from 'aws-amplify-react-native';
 //@ts-ignore
-import UserAvatar from '../images/user.png';
 import Animation from 'lottie-react-native';
 
 import DeviceInfo from 'react-native-device-info';
 import {Analytics} from 'aws-amplify';
-import {sendPush} from '../api/API';
 
 type Props = {
   email: string;
@@ -41,15 +31,8 @@ export default function Home(props: Props) {
     const bootstrap = async () => {
       const user = await profile.getUser(props.email);
 
-      // profile.setUser({
-      //   ...user,
-      //   deviceIds: [...(user.deviceIds || []), deviceId],
-      // });
       if (!('pk' in user) || !user.pk) {
         registerNewUser();
-      } else {
-        // if (user && user.deviceIds && !user.deviceIds.includes(deviceId)) {
-        // }
       }
     };
     bootstrap();
@@ -73,7 +56,6 @@ export default function Home(props: Props) {
 
   return (
     <View>
-      {/* <HobbitHole /> */}
       <View
         style={{display: 'flex', flexDirection: 'row', alignSelf: 'flex-end'}}>
         <Text
@@ -85,21 +67,10 @@ export default function Home(props: Props) {
           }}>
           {props.email}
         </Text>
-        {/* <Image source={UserAvatar} style={{width: 50, height: 50}} /> */}
       </View>
       <Text style={{color: 'blue', fontSize: 30, textAlign: 'center'}}>
         {message}
       </Text>
-      {/* <Button
-        title="send push "
-        onPress={() => {
-          sendPush({message: 'hi bidy', title: 'hobit', users: [props.email]});
-        }}></Button> */}
-      {/* <View
-        style={{
-          height: StyleSheet.hairlineWidth,
-          backgroundColor: 'brown',
-        }}></View> */}
 
       <View
         style={{
