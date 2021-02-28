@@ -13,6 +13,7 @@ import {Calendar} from 'react-native-calendars';
 import CheckBox from '@react-native-community/checkbox';
 
 import {streakRanges} from 'date-streaks';
+import getMarkedDates from '../utils/getMarkedDates';
 
 const shareIcon = require('../images/share.png');
 const calendarImg = require('../images/calendar.png');
@@ -74,92 +75,7 @@ const Activity = (props: Props) => {
 
   const json = activityJsonMapper[activityName];
 
-  const data = Object.keys(activity.logs)
-    .filter((key) => key.indexOf(user.pk + 'activity_' + activityId) > -1)
-    .reduce((result, id) => {
-      const instance = activity.logs[id];
-      const iso = instance.sk.replace('activity_' + activityId + '_', '');
-      const date = iso.split('T')[0];
-      const count = (result[date] || 0) + instance.duration;
-      // console.log(instance);
-      return {
-        ...result,
-        [date]: count,
-      };
-    }, {});
-
-  const commits = Object.keys(data).map((d) => ({
-    date: d,
-    count: data[d] / 60,
-  }));
-
-  const streaks = streakRanges({dates: commits.map((d) => new Date(d.date))});
-
-  const map = streaks.reduce((final, current) => {
-    const {start, end} = current;
-    const s = start.toISOString().split('T')[0];
-    const e = end && end.toISOString().split('T')[0];
-    if (!e) {
-      return {
-        ...final,
-        [s]: {
-          periods: [
-            {
-              color: '#70d7c7',
-              textColor: 'white',
-              startingDay: true,
-              endingDay: true,
-            },
-          ],
-        },
-      };
-    }
-
-    const middleDates: any = Array.from({length: current.duration - 2}).reduce(
-      (middle: any, _, index) => {
-        const newDate = new Date(
-          new Date(s).getTime() + 3600 * 24 * (index + 1) * 1000,
-        )
-          .toISOString()
-          .split('T')[0];
-        return {
-          ...middle,
-          [newDate]: {
-            periods: [
-              {
-                color: '#70d7c7',
-                textColor: 'white',
-              },
-            ],
-          },
-        };
-      },
-      {},
-    );
-    return {
-      ...final,
-      [s]: {
-        periods: [
-          {
-            color: '#70d7c7',
-            textColor: 'white',
-            startingDay: true,
-          },
-        ],
-      },
-      [e]: {
-        periods: [
-          {
-            color: '#70d7c7',
-            textColor: 'white',
-            endingDay: true,
-          },
-        ],
-      },
-      ...middleDates,
-    };
-  }, {});
-
+  const marked = getMarkedDates(activity.logs, [user.pk], activityId);
   return (
     <ScrollView>
       <View
@@ -274,7 +190,7 @@ const Activity = (props: Props) => {
             justifyContent: 'center',
             alignItems: 'center',
           }}></View>
-        <Calendar markedDates={map} markingType="multi-period" />
+        <Calendar markedDates={marked} markingType="multi-period" />
       </View>
       <View
         style={{

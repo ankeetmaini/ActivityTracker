@@ -9,7 +9,7 @@ import {User} from '../../types/models';
 //@ts-ignore
 import Animation from 'lottie-react-native';
 import {RouteProp} from '@react-navigation/native';
-import DeviceInfo from 'react-native-device-info';
+
 import {Analytics} from 'aws-amplify';
 import {ScrollView} from 'react-native-gesture-handler';
 
