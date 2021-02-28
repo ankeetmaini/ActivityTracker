@@ -25,9 +25,10 @@ export default function Home(props: Props) {
 
   useEffect(() => {
     if (props.email) {
-      Analytics.updateEndpoint({
-        userId: props.email,
-      });
+      // Analytics.updateEndpoint({
+      //   userId: props.email,
+      //   optOut: 'NONE',
+      // });
     }
 
     const bootstrap = async () => {

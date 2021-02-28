@@ -1,7 +1,7 @@
 import {streakRanges} from 'date-streaks';
 import {ActivityEvent} from '../../types/models';
 
-const getColor = (str) => {
+export const getColor = (str: string) => {
   var hash = 0;
   if (str.length === 0) return hash;
   for (var i = 0; i < str.length; i++) {
@@ -29,7 +29,7 @@ export default function getMarkedDates(
         const iso = instance.sk.replace('activity_' + activityId + '_', '');
         const date = iso.split('T')[0];
         const count = (result[date] || 0) + instance.duration;
-        // console.log(instance);
+
         return {
           ...result,
           [date]: count,
@@ -119,6 +119,6 @@ export default function getMarkedDates(
       ];
     });
   });
-  console.log(final);
+
   return final;
 }

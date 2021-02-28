@@ -48,6 +48,14 @@
                 ]
             },
             "policyResourceName": "/notify"
+        },
+        {
+            "name": "/redirect/{link}",
+            "lambdaFunction": "redirect",
+            "privacy": {
+                "open": true
+            },
+            "policyResourceName": "/redirect/*"
         }
     ],
     "resourceName": "activityStore",
@@ -64,6 +72,9 @@
         },
         {
             "lambdaFunction": "notifyUsers"
+        },
+        {
+            "lambdaFunction": "redirect"
         }
     ],
     "privacy": {
@@ -104,7 +115,15 @@
                 "Name",
                 "Arn"
             ]
+        },
+        {
+            "category": "function",
+            "resourceName": "redirect",
+            "attributes": [
+                "Name",
+                "Arn"
+            ]
         }
     ],
-    "uuid": "3b3c5fa4"
+    "uuid": "6ad20206"
 }

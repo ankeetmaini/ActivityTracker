@@ -31,6 +31,10 @@
         "notifyUsers": {
           "deploymentBucketName": "amplify-activitytracker-dev-234703-deployment",
           "s3Key": "amplify-builds/notifyUsers-63677a414e3245767452-build.zip"
+        },
+        "redirect": {
+          "deploymentBucketName": "amplify-activitytracker-dev-234703-deployment",
+          "s3Key": "amplify-builds/redirect-4952394d36706f323442-build.zip"
         }
       },
       "notifications": {

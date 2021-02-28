@@ -1,4 +1,4 @@
-import {Share, Text, ToastAndroid, View, Image} from 'react-native';
+import {Share, Text, ToastAndroid, View, Image, StyleSheet} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RouteProp} from '@react-navigation/native';
@@ -13,7 +13,8 @@ import {Calendar} from 'react-native-calendars';
 import CheckBox from '@react-native-community/checkbox';
 
 import {streakRanges} from 'date-streaks';
-import getMarkedDates from '../utils/getMarkedDates';
+import getMarkedDates, {getColor} from '../utils/getMarkedDates';
+import {sendPush} from '../api/API';
 
 const shareIcon = require('../images/share.png');
 const calendarImg = require('../images/calendar.png');
@@ -41,9 +42,10 @@ const Activity = (props: Props) => {
   useEffect(() => {
     activity.getActivityLog(user.pk, `${activityId}_${date}`, activityId);
     // fetch for all friends
-    user.activities[activityId].forEach((friend) =>
-      activity.getActivityLog(friend, `${activityId}_${date}`, activityId),
-    );
+    user.activities[activityId] &&
+      user.activities[activityId].forEach((friend) =>
+        activity.getActivityLog(friend, `${activityId}_${date}`, activityId),
+      );
   }, []);
 
   useEffect(() => {
@@ -59,23 +61,40 @@ const Activity = (props: Props) => {
 
   const log = async () => {
     const date = new Date();
-
-    activity.logActivity(user.pk, activityId, {
+    const event = {
       duration: 60,
       pk: user.pk,
       sk: 'activity_' + activityId + '_' + date.toISOString(),
-    });
+    };
+    activity.logActivity(user.pk, activityId, event);
+
+    // user.activities[activityId].forEach((friend) => {
+    //   sendPush({
+    //     message: user.pk + ' just did ' + activityName,
+    //     title: 'hey ',
+    //     users: [friend],
+    //   })
+    //     .then((res) => console.log(res))
+    //     .catch((err) => console.log(err));
+    // });
   };
 
   const onShare = async () => {
     await Share.share({
-      message: 'activitytracker://share/' + activityId + '/' + user.pk,
+      message:
+        'https://ozv46g9414.execute-api.us-east-1.amazonaws.com/dev/redirect/activitytracker://share/' +
+        activityId +
+        '/' +
+        user.pk,
     });
   };
 
   const json = activityJsonMapper[activityName];
-
-  const marked = getMarkedDates(activity.logs, [user.pk], activityId);
+  const marked = getMarkedDates(
+    activity.logs,
+    [user.pk, ...(user.activities[activityId] || [])],
+    activityId,
+  );
   return (
     <ScrollView>
       <View
@@ -171,7 +190,6 @@ const Activity = (props: Props) => {
                   hideBox={true}
                   boxType={'circle'}
                   onCheckColor={'#6F763F'}
-                  disabled={mark}
                   onFillColor={'#4DABEC'}
                   onTintColor={'#F4DCF8'}
                   animationDuration={2}
@@ -183,14 +201,41 @@ const Activity = (props: Props) => {
           </>
         )}
 
-        <View
-          style={{
-            display: 'flex',
-            margin: 10,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}></View>
         <Calendar markedDates={marked} markingType="multi-period" />
+
+        <View
+          style={{height: StyleSheet.hairlineWidth, backgroundColor: '#893a77'}}
+        />
+        <Text style={{fontSize: 10, margin: 10, fontWeight: 'bold'}}>
+          You and your friends in the same Hobbit-hole
+        </Text>
+
+        <View>
+          {[user.pk, ...(user.activities[activityId] || [])].map((id) => (
+            <View
+              key={id}
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                margin: 10,
+              }}>
+              <View
+                style={{
+                  width: 20,
+                  height: 20,
+                  backgroundColor: getColor(id),
+                  marginRight: 10,
+                }}
+              />
+
+              <View>
+                <Text style={{fontSize: 10}}>
+                  {id === user.pk ? 'You' : id}
+                </Text>
+              </View>
+            </View>
+          ))}
+        </View>
       </View>
       <View
         style={{

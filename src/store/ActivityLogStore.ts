@@ -21,7 +21,7 @@ export const useActivityLogs = create<ActivityState>(
           ...state,
           logs: {
             ...state.logs,
-            [pk + id]: event,
+            [pk + event.sk]: event,
           },
         }));
       },

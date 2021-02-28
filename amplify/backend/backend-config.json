@@ -84,6 +84,11 @@
           ]
         }
       ]
+    },
+    "redirect": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
     }
   },
   "api": {
@@ -118,6 +123,14 @@
         {
           "category": "function",
           "resourceName": "notifyUsers",
+          "attributes": [
+            "Name",
+            "Arn"
+          ]
+        },
+        {
+          "category": "function",
+          "resourceName": "redirect",
           "attributes": [
             "Name",
             "Arn"

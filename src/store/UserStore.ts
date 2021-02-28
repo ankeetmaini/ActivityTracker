@@ -24,12 +24,9 @@ export const useProfile = create<UserState>(
     (set, get) => ({
       ...initalState,
       async getUser(pk) {
-        if (!get().pk) {
-          const user = await getUser(pk);
-          set(user);
-          return user;
-        }
-        return get();
+        const user = await getUser(pk);
+        set(user);
+        return user;
       },
 
       async setUser(user) {
