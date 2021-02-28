@@ -51,7 +51,15 @@ const App = (props: any) => {
   const email = oAuthUser?.attributes?.email;
 
   return (
-    <NavigationContainer>
+    <NavigationContainer
+      linking={{
+        prefixes: ['activitytracker://'],
+        config: {
+          screens: {
+            Invite: 'share/:activity/:userId',
+          },
+        },
+      }}>
       <Stack.Navigator>
         {email ? (
           <>
