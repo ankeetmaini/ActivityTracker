@@ -1,10 +1,9 @@
-import React, {useEffect} from 'react';
-import {Linking, PushNotificationIOS} from 'react-native';
-import Amplify, {Analytics} from 'aws-amplify';
-import PushNotification from '@aws-amplify/pushnotification';
+import React from 'react';
+import {Linking} from 'react-native';
+import Amplify from 'aws-amplify';
+
 import InAppBrowser from 'react-native-inappbrowser-reborn';
 import {withOAuth} from 'aws-amplify-react-native';
-import DeviceInfo from 'react-native-device-info';
 
 import config from './aws-exports';
 import {NavigationContainer} from '@react-navigation/native';
@@ -40,7 +39,7 @@ Amplify.configure({
 });
 
 export type StackParams = {
-  Home: undefined;
+  Home: {activity?: string; userId?: string};
   Splash: undefined;
   Activity: {id: string; name: string};
 };
@@ -56,7 +55,7 @@ const App = (props: any) => {
         prefixes: ['activitytracker://'],
         config: {
           screens: {
-            Invite: 'share/:activity/:userId',
+            Home: 'share/:activity/:userId',
           },
         },
       }}>

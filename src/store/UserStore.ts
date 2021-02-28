@@ -16,6 +16,7 @@ interface UserState extends User {
   setUser: (user: User) => void;
   markActivityFav: (activityId: string) => void;
   getUser: (pk: string) => Promise<UserState | {}>;
+  addFriend: (friend: string, activityId: string) => void;
 }
 
 export const useProfile = create<UserState>(
@@ -49,6 +50,27 @@ export const useProfile = create<UserState>(
           ...state,
           ...newUser,
         }));
+      },
+
+      async addFriend(friend, activityId) {
+        const {activities, pk, sk, proDate} = get();
+        activities[activityId] = activities[activityId] || [];
+        activities[activityId].push(friend);
+        this.setUser({
+          activities,
+          pk,
+          sk,
+          proDate,
+        });
+
+        // now save the current user as friend of the added user
+        const friendProfile = await getUser(friend);
+        if ('pk' in friendProfile) {
+          friendProfile.activities[activityId] =
+            friendProfile.activities[activityId] || [];
+          friendProfile.activities[activityId].push(pk);
+          await createUpdateUser(friendProfile);
+        }
       },
     }),
     {

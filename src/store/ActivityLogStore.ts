@@ -5,9 +5,9 @@ import {ActivityEvent} from '../../types/models';
 import {fetchActivityLog, logActivity} from '../api/API';
 
 interface ActivityState {
-  logs: Record<string, Record<string, ActivityEvent>>;
+  logs: Record<string, ActivityEvent>;
   getActivityLog: (pk: string, sk: string, activityId: string) => void;
-  logActivity: (id: string, event: ActivityEvent) => void;
+  logActivity: (pk: string, id: string, event: ActivityEvent) => void;
 }
 
 export const useActivityLogs = create<ActivityState>(
@@ -15,38 +15,36 @@ export const useActivityLogs = create<ActivityState>(
     (set) => ({
       logs: {},
 
-      async logActivity(id, event) {
+      async logActivity(pk, id, event) {
         await logActivity(event);
         set((state) => ({
           ...state,
           logs: {
             ...state.logs,
-            [id]: {
-              ...(state.logs[id] || {}),
-              [event.sk]: event,
-            },
+            [pk + id]: event,
           },
         }));
       },
 
       async getActivityLog(pk, sk, activityId) {
         const items = await fetchActivityLog({pk, sk});
+
         const map = items.data.Items.reduce((result, current) => {
           return {
             ...result,
-            [current.sk]: current,
+            [pk + current.sk]: current,
           };
         }, {});
-        set((state) => ({
-          ...state,
-          logs: {
-            ...state.logs,
-            [activityId]: {
-              ...(state.logs[activityId] || {}),
+
+        set((state) => {
+          return {
+            ...state,
+            logs: {
+              ...state.logs,
               ...map,
             },
-          },
-        }));
+          };
+        });
       },
     }),
     {

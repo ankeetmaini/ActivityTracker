@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect} from 'react';
 import {Text, TouchableOpacity, View} from 'react-native';
 import {StackNavigationProp} from '@react-navigation/stack';
 
@@ -8,7 +8,7 @@ import {useProfile} from '../store/UserStore';
 import {User} from '../../types/models';
 //@ts-ignore
 import Animation from 'lottie-react-native';
-
+import {RouteProp} from '@react-navigation/native';
 import DeviceInfo from 'react-native-device-info';
 import {Analytics} from 'aws-amplify';
 import {ScrollView} from 'react-native-gesture-handler';
@@ -16,11 +16,12 @@ import {ScrollView} from 'react-native-gesture-handler';
 type Props = {
   email: string;
   navigation: StackNavigationProp<StackParams, 'Home'>;
+  route: RouteProp<StackParams, 'Home'>;
 };
 
 export default function Home(props: Props) {
-  const [message, setMessage] = useState('');
   const profile = useProfile();
+  const params = props.route.params;
 
   useEffect(() => {
     if (props.email) {
@@ -33,25 +34,26 @@ export default function Home(props: Props) {
       const user = await profile.getUser(props.email);
 
       if (!('pk' in user) || !user.pk) {
-        registerNewUser();
+        await registerNewUser({});
+      }
+
+      if (params && params.activity && params.userId && 'pk' in user) {
+        user.addFriend(params.userId, params.activity);
       }
     };
     bootstrap();
-  }, []);
+  }, [params]);
 
-  const registerNewUser = async () => {
+  const registerNewUser = async (activites: User['activities']) => {
     try {
-      setMessage('First time user, creating a profile...');
       const userPayload: User = {
         pk: props.email,
         sk: 'profile',
         proDate: 0,
         activities: {},
-        deviceIds: [DeviceInfo.getUniqueId()],
       };
 
       await profile.setUser(userPayload);
-      setMessage('Profile created!');
     } catch (error) {}
   };
 
@@ -69,9 +71,6 @@ export default function Home(props: Props) {
           {props.email}
         </Text>
       </View>
-      <Text style={{color: 'blue', fontSize: 30, textAlign: 'center'}}>
-        {message}
-      </Text>
 
       <View
         style={{

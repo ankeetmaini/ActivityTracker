@@ -1,4 +1,4 @@
-import {Button, Share, Text, ToastAndroid, View, Image} from 'react-native';
+import {Share, Text, ToastAndroid, View, Image} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RouteProp} from '@react-navigation/native';
@@ -11,10 +11,11 @@ import activityJsonMapper from '../utils/activityJsonMapper';
 import Animation from 'lottie-react-native';
 import {Calendar} from 'react-native-calendars';
 import CheckBox from '@react-native-community/checkbox';
-import calendarImg from '../images/calendar.png';
-import {streakRanges} from 'date-streaks';
-import shareIcon from '../images/share.png';
 
+import {streakRanges} from 'date-streaks';
+
+const shareIcon = require('../images/share.png');
+const calendarImg = require('../images/calendar.png');
 const marginProps = {
   marginTop: 10,
   marginBottom: 10,
@@ -31,13 +32,17 @@ const Activity = (props: Props) => {
   const activityName = props.route.params.name;
   const user = useProfile();
 
-  const [date, setDate] = useState('2021-');
+  const [date] = useState('2021-');
   const [mark, setMark] = useState(false);
   const isFavAlready = user.activities[activityId];
   const activity = useActivityLogs();
 
   useEffect(() => {
     activity.getActivityLog(user.pk, `${activityId}_${date}`, activityId);
+    // fetch for all friends
+    user.activities[activityId].forEach((friend) =>
+      activity.getActivityLog(friend, `${activityId}_${date}`, activityId),
+    );
   }, []);
 
   useEffect(() => {
@@ -54,7 +59,7 @@ const Activity = (props: Props) => {
   const log = async () => {
     const date = new Date();
 
-    activity.logActivity(activityId, {
+    activity.logActivity(user.pk, activityId, {
       duration: 60,
       pk: user.pk,
       sk: 'activity_' + activityId + '_' + date.toISOString(),
@@ -69,19 +74,19 @@ const Activity = (props: Props) => {
 
   const json = activityJsonMapper[activityName];
 
-  const data = Object.keys(activity.logs[activityId] || {}).reduce(
-    (result, id) => {
-      const instance = activity.logs[activityId][id];
+  const data = Object.keys(activity.logs)
+    .filter((key) => key.indexOf(user.pk + 'activity_' + activityId) > -1)
+    .reduce((result, id) => {
+      const instance = activity.logs[id];
       const iso = instance.sk.replace('activity_' + activityId + '_', '');
       const date = iso.split('T')[0];
       const count = (result[date] || 0) + instance.duration;
+      // console.log(instance);
       return {
         ...result,
         [date]: count,
       };
-    },
-    {},
-  );
+    }, {});
 
   const commits = Object.keys(data).map((d) => ({
     date: d,
@@ -89,25 +94,29 @@ const Activity = (props: Props) => {
   }));
 
   const streaks = streakRanges({dates: commits.map((d) => new Date(d.date))});
+
   const map = streaks.reduce((final, current) => {
     const {start, end} = current;
     const s = start.toISOString().split('T')[0];
     const e = end && end.toISOString().split('T')[0];
-    if (!end) {
+    if (!e) {
       return {
         ...final,
         [s]: {
-          color: '#70d7c7',
-          textColor: 'white',
-          startingDay: true,
-          endingDay: true,
+          periods: [
+            {
+              color: '#70d7c7',
+              textColor: 'white',
+              startingDay: true,
+              endingDay: true,
+            },
+          ],
         },
       };
     }
 
-    const middleDates: {} = Array.from({length: current.duration - 2}).reduce(
-      (middle, _, index) => {
-        console.log(s);
+    const middleDates: any = Array.from({length: current.duration - 2}).reduce(
+      (middle: any, _, index) => {
         const newDate = new Date(
           new Date(s).getTime() + 3600 * 24 * (index + 1) * 1000,
         )
@@ -116,8 +125,12 @@ const Activity = (props: Props) => {
         return {
           ...middle,
           [newDate]: {
-            color: '#70d7c7',
-            textColor: 'white',
+            periods: [
+              {
+                color: '#70d7c7',
+                textColor: 'white',
+              },
+            ],
           },
         };
       },
@@ -126,14 +139,22 @@ const Activity = (props: Props) => {
     return {
       ...final,
       [s]: {
-        color: '#70d7c7',
-        textColor: 'white',
-        startingDay: true,
+        periods: [
+          {
+            color: '#70d7c7',
+            textColor: 'white',
+            startingDay: true,
+          },
+        ],
       },
       [e]: {
-        color: '#70d7c7',
-        textColor: 'white',
-        endingDay: true,
+        periods: [
+          {
+            color: '#70d7c7',
+            textColor: 'white',
+            endingDay: true,
+          },
+        ],
       },
       ...middleDates,
     };
@@ -234,6 +255,7 @@ const Activity = (props: Props) => {
                   hideBox={true}
                   boxType={'circle'}
                   onCheckColor={'#6F763F'}
+                  disabled={mark}
                   onFillColor={'#4DABEC'}
                   onTintColor={'#F4DCF8'}
                   animationDuration={2}
@@ -252,7 +274,7 @@ const Activity = (props: Props) => {
             justifyContent: 'center',
             alignItems: 'center',
           }}></View>
-        <Calendar markedDates={map} markingType={'period'} />
+        <Calendar markedDates={map} markingType="multi-period" />
       </View>
       <View
         style={{
